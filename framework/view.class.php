@@ -6,7 +6,6 @@ defined('__CUBO__') || new \Exception("No use starting a class without an includ
 class View {
 	protected $class;
 	protected $_Attribute;
-	protected $_Template;
 	
 	public function __construct() {
 		$this->class = basename(str_replace('\\','/',get_called_class()),'View');
@@ -64,6 +63,18 @@ class View {
 		$html = '<h1>'.ucwords($this->class).' List</h1>';
 		// Show filters
 		$html .= $this->showFilters();
+		// Show filter info
+		$html .= '<p id="filter-info"></p>';
+		// Begin table
+		$html .= '<div class="grid-rows">';
+		// Show table headers
+		$html .= $this->showTableHeaders();
+		// Show table rows
+		foreach($_Data as $row) {
+			$html .= $this->showTableRow($row);
+		}
+		// End table
+		$html .= '</div>';
 		// Render plugins and return output
 		return $this->renderPlugins($html);
 	}
@@ -77,6 +88,18 @@ class View {
 				$html = $plugin::render($html);
 		}
 		return $html;
+	}
+	
+	// Show access level
+	public function showAccessLevel(&$item) {
+		$_AccessLevel = Category::get($item->accesslevel,"`#`,`title`");
+		return $_AccessLevel->title ?? false;
+	}
+	
+	// Show category
+	public function showCategory(&$item) {
+		$_Category = Category::get($item->category,"`#`,`title`");
+		return $_Category->title ?? false;
 	}
 	
 	public function showFilters() {
@@ -93,6 +116,44 @@ class View {
 		}
 		$html .= '</div>';
 		$html .= '</form>';
+		return $html;
+	}
+	
+	// Show language
+	public function showLanguage(&$item) {
+		$_Language = Language::get($item->language,"`#`,`title`");
+		return $_Language->title ?? false;
+	}
+	
+	// Show status
+	public function showStatus(&$item) {
+		$_Status = Status::get($item->status,"`#`,`title`");
+		return $_Status->title ?? false;
+	}
+	
+	public function showTableHeaders() {
+		$routePath = Application::getController()->getRouter()->getRoutePath();
+		$html = '<div class="grid-columns row-header">';
+		foreach(explode(',',$this->listColumns) as $column) {
+			$html .= '<div class="align-middle"><strong>'.ucwords($column).'</strong></div>';
+		}
+		$html .= '<div class="text-right align-middle"><a href="'.$routePath.$this->class.'/create" class="btn btn-sm btn-success'.(Application::getController()->canCreate() ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-plus fa-fw"></i></a></div>';
+		$html .= '</div>';
+		return $html;
+	}
+	
+	public function showTableRow(&$item) {
+		$routePath = Application::getController()->getRouter()->getRoutePath();
+		$html = '<div class="table-item d-none grid-columns row-body" data-item="'.htmlentities(json_encode($item)).'" data-filter="none">';
+		$html .= '<div class="align-middle">'.$item->title.'</div>';
+		$html .= '<div class="align-middle">'.$this->showStatus($item).'</div>';
+		$html .= '<div class="align-middle">'.$this->showCategory($item).'</div>';
+		$html .= '<div class="align-middle">'.$this->showLanguage($item).'</div>';
+		$html .= '<div class="align-middle">'.$this->showAccessLevel($item).'</div>';
+		$html .= '<div class="text-right align-middle">';
+		$html .= '<a href="'.$routePath.$this->class.'/edit/'.$item->{'#'}.'" class="btn btn-sm btn-warning'.(Application::getController()->canEdit($item->author) ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-pen fa-fw"></i></a>';
+		$html .= '<a href="'.$routePath.$this->class.'/trash/'.$item->{'#'}.'" class="btn btn-sm btn-danger'.(Application::getController()->canPublish() ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-trash fa-fw"></i></a>';
+		$html .= '</div></div>';
 		return $html;
 	}
 	
