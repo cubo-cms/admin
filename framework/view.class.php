@@ -75,6 +75,9 @@ class View {
 		}
 		// End table
 		$html .= '</div>';
+		// Add script
+		$routePath = Application::getController()->getRouter()->getRoutePath();
+		Configuration::addScript($routePath.'js/filtering.js');
 		// Render plugins and return output
 		return $this->renderPlugins($html);
 	}
