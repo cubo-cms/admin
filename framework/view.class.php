@@ -95,7 +95,7 @@ class View {
 	
 	// Show access level
 	public function showAccessLevel(&$item) {
-		$_AccessLevel = Category::get($item->accesslevel,"`#`,`title`");
+		$_AccessLevel = AccessLevel::get($item->accesslevel,"`#`,`title`");
 		return $_AccessLevel->title ?? false;
 	}
 	
