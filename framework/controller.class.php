@@ -40,15 +40,21 @@ class Controller {
 	// Returns filter for list permission
 	public function requireListPermission() {
 		$filter = [];
-		if($this->containsAccessProperty())
-			if(Session::isAdmin())
-				$filter[] = '`accesslevel` IN ('.ACCESS_PUBLIC.','.ACCESS_REGISTERED.','.ACCESS_ADMIN.')';
-			elseif(Session::isRegistered())
-				$filter[] = '`accesslevel` IN ('.ACCESS_PUBLIC.','.ACCESS_REGISTERED.')';
-			else
-				$filter[] = '`accesslevel` IN ('.ACCESS_PUBLIC.','.ACCESS_GUEST.')';
-		if($this->containsStatusProperty())
-			$filter[] = "`status`=".STATUS_PUBLISHED;
+		if($this->containsAccessProperty()) {
+			$filter[] = '`accesslevel` IN ('.ACCESS_PUBLIC.','.ACCESS_REGISTERED.','.ACCESS_GUEST.','.ACCESS_PRIVATE.','.ACCESS_ADMIN.')';
+		}
+		if($this->containsStatusProperty()) {
+			if(in_array(Session::getRole(),$this->_Managers)) {
+				// No further restrictions
+			} elseif(in_array(Session::getRole(),$this->_Publishers)) {
+				$filter[] = '`status` IN ('.STATUS_PUBLISHED.','.STATUS_UNPUBLISHED.')';
+			} elseif(in_array(Session::getRole(),$this->_Editors)) {
+				$filter[] = '`status`='.STATUS_UNPUBLISHED;
+			} elseif(in_array(Session::getRole(),$this->_Authors)) {
+				$filter[] = '`status`='.STATUS_UNPUBLISHED;
+				$filter[] = '`author`='.Session::getUser();
+			}
+		}
 		return implode(' AND ',$filter) ?? '1';
 	}
 	
@@ -68,7 +74,20 @@ class Controller {
 	public function all() {
 		$model = __CUBO__.'\\'.$this->getRouter()->getController();
 		try {
-			if(class_exists($model)) {
+			if(!Session::isAuthor()) {
+				// User does not have administrative privileges
+				if(Session::isGuest()) {
+					// No user is logged in; redirect to login page
+					$model = ucfirst($this->getRouter()->getController());
+					Session::setMessage(array('alert'=>'info','icon'=>'exclamation','message'=>"{$model} list requires administrative privileges"));
+					Session::set('loginRedirect',Configuration::getParameter('uri'));
+					Router::redirect('/user/login',403);
+				} else {
+					// User is logged in, so does not have required permissions
+					$model = $this->getRouter()->getController();
+					throw new Error(['class'=>__CLASS__,'method'=>__METHOD__,'line'=>__LINE__,'file'=>__FILE__,'severity'=>3,'response'=>405,'message'=>"User does not have administrative privileges to access {$model} list"]);
+				}
+			} elseif(class_exists($model)) {
 				$this->_Model = new $model;
 				$_Data = $this->_Model::getAll($this->columns,$this->requireListPermission());
 				if($_Data) {
@@ -196,7 +215,7 @@ class Controller {
 	
 	// Returns true if current user does not have permitted role to create an item
 	public function cannotCreate() {
-		return !$this->canCreate($author);
+		return !$this->canCreate();
 	}
 	
 	// Returns true if current user is the author or has permitted role to edit an item
@@ -227,16 +246,6 @@ class Controller {
 	// Returns true if current user is not the author and does not have permitted role to publish an item
 	public function cannotPublish() {
 		return !$this->canPublish();
-	}
-	
-	// Returns true (for the moment)
-	public function canRead() {
-		return true;
-	}
-	
-	// Returns false (for the moment)
-	public function cannotRead() {
-		return !$this->canRead();
 	}
 }
 ?>
