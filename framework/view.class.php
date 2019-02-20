@@ -11,6 +11,79 @@ class View {
 		$this->class = basename(str_replace('\\','/',get_called_class()),'View');
 	}
 	
+	// Call create method
+	public function create(&$_Data) {
+		// No need to store attributes; creating new ones
+		$this->_Attribute = [];
+		// Retrieve the template; we need the template attributes as they are global settings
+		$_Template = Template::get($_Data->template ?? Configuration::getDefault('template','default'),"`name`,`@attribute`");
+		if($_Template) {
+			// Save template name as parameter
+			Configuration::setParameter('template',$_Template->name);
+			// Save template attributes as global settings
+			!empty($_Template->{'@attribute'}) && Configuration::set('_Attribute',json_decode($_Template->{'@attribute'},true));
+		}
+		// Show heading
+		$html = '<h1>Create '.ucwords($this->class).'</h1>';
+		// Initiate form
+		$_Definition = $this->getDefinition();
+		$html .= '<form class="form-create" action="" method="post">';
+		// Save and cancel buttons
+		$routePath = Application::getController()->getRouter()->getRoutePath();
+		$html .= '<div class="form-group">';
+		$html .= '<button class="btn btn-success" id="submit" type="submit" disabled><i class="fa fa-check"></i> Save</button>';
+		$html .= '<a href="'.$routePath.strtolower($this->class).'" class="btn btn-danger" id="cancel"><i class="fa fa-times"></i> Cancel</a>';
+		$html .= '</div>';
+		// Show title and name
+		$html .= '<div class="grid-columns">';
+		$html .= '<div class="form-group grid-column-2"><label for="title">Title</label><input type="text" name="title" id="title" class="form-control" placeholder="Title" required autofocus /></div>';
+		$html .= '<div class="form-group"><label for="name">Alias</label><input type="text" name="name" id="name" class="form-control" placeholder="Alias" required /></div>';
+		$html .= '</div>';
+		// Show tabs
+		$html .= '<ul class="nav nav-tabs" id="tabs" role="tablist">';
+		foreach($_Definition->tabs as $tab) {
+			$tab = (object)$tab;
+			$html .= '<li class="nav-item"><a class="nav-link'.($tab->selected ? ' active' : '').'" id="'.$tab->tab.'" data-toggle="tab" href="#'.$tab->pane.'" role="tab" aria-controls="'.$tab->pane.'" aria-selected="'.($tab->selected ? 'true' : 'false').'">'.$tab->title.'</a></li>';
+		}
+		$html .= '</ul>';
+		// Show panes
+		$html .= '<div class="tab-content">';
+		foreach($_Definition->tabs as $tab) {
+			$tab = (object)$tab;
+			$html .= '<div class="tab-pane fade'.($tab->selected ? ' show active' : '').'" id="'.$tab->pane.'" role="tabpanel" aria-labelledby="'.$tab->tab.'">';
+			$html .= '<div class="row">';
+			if(isset($_Definition->{$tab->pane}['columns'])) {
+			$columns = $_Definition->{$tab->pane}['columns'];
+			//show($columns);
+			foreach($columns as $column=>$class) {
+				$column = $_Definition->{$tab->pane}[$column];
+				$html .= '<div class="'.$class.'">';
+				//show($column);
+				foreach($column as $field) {
+					$field = (object)$field;
+					$html .= $this->showField($field);
+				}
+				$html .= '</div>';
+			}
+			}
+			$html .= '</div>';
+			$html .= '</div>';
+		}
+		$html .= '</div>';
+		// Render plugins and return output
+		return $this->renderPlugins($html);
+	}
+	
+	public function showField($field) {
+		$type = $field->type;
+		return Form::$type($field);
+	}
+	
+	// Call default method: list
+	public function default(&$_Data) {
+		return $this->list($_Data);
+	}
+	
 	// Get attribute
 	public function getAttribute($attribute) {
 		return (isset($this->_Attribute[$attribute]) && $this->_Attribute[$attribute] != SETTING_GLOBAL ? $this->_Attribute[$attribute] : Configuration::getAttribute($attribute) ?? null);
@@ -21,32 +94,7 @@ class View {
 		return $this->class;
 	}
 	
-	public function default(&$_Data) {
-		return $this->html($_Data);
-	}
-	
-	public function html(&$_Data) {
-		// Store the article attributes
-		if(empty($this->_Attribute))
-			!empty($_Data->{'@attribute'}) && $this->_Attribute = json_decode($_Data->{'@attribute'},true);
-		// Retrieve the template; we need the template attributes as they are global settings
-		$_Template = Template::get($_Data->template ?? Configuration::getDefault('template','default'),"`name`,`@attribute`");
-		if($_Template) {
-			// Save template name as parameter
-			Configuration::setParameter('template',$_Template->name);
-			// Save template attributes as global settings
-			!empty($_Template->{'@attribute'}) && Configuration::set('_Attribute',json_decode($_Template->{'@attribute'},true));
-		}
-		// Get the body of the article
-		if(is_array($_Data)) {
-			$html = $this->showList($_Data);
-		} else {
-			$html = $this->showItem($_Data);
-		}
-		// Render plugins and return output
-		return $this->renderPlugins($html);
-	}
-	
+	// Call list method
 	public function list(&$_Data) {
 		// Store the article attributes
 		if(empty($this->_Attribute))
@@ -108,10 +156,10 @@ class View {
 	public function showFilters() {
 		$html = '<form id="filter-form" class="form">';
 		$html .= '<div class="grid-columns">';
-		foreach($this->listFilters() as $filter=>$data) {
+		foreach($this->getFilters() as $filter=>$data) {
 			switch($filter) {
 				case 'text':
-					$html .= Form::textFilter(array('id'=>'filter-text','label'=>'Search','prefix'=>'','value'=>''));
+					$html .= Form::textFilter($data);
 					break;
 				default:
 					$html .= Form::selectFilter($data);
@@ -140,7 +188,7 @@ class View {
 		foreach(explode(',',$this->listColumns) as $column) {
 			$html .= '<div class="align-middle"><strong>'.ucwords($column).'</strong></div>';
 		}
-		$html .= '<div class="text-right align-middle"><a href="'.$routePath.$this->class.'/create" class="btn btn-sm btn-success'.(Application::getController()->canCreate() ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-plus fa-fw"></i></a></div>';
+		$html .= '<div class="text-right align-middle"><a href="'.$routePath.strtolower($this->class).'/create" class="btn btn-sm btn-success'.(Application::getController()->canCreate() ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-plus fa-fw"></i></a></div>';
 		$html .= '</div>';
 		return $html;
 	}
@@ -154,10 +202,28 @@ class View {
 		$html .= '<div class="align-middle">'.$this->showLanguage($item).'</div>';
 		$html .= '<div class="align-middle">'.$this->showAccessLevel($item).'</div>';
 		$html .= '<div class="text-right align-middle">';
-		$html .= '<a href="'.$routePath.$this->class.'/edit/'.$item->{'#'}.'" class="btn btn-sm btn-warning'.(Application::getController()->canEdit($item->author) ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-pen fa-fw"></i></a>';
-		$html .= '<a href="'.$routePath.$this->class.'/trash/'.$item->{'#'}.'" class="btn btn-sm btn-danger'.(Application::getController()->canPublish() ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-trash fa-fw"></i></a>';
+		$html .= '<a href="'.$routePath.strtolower($this->class).'/edit/'.$item->{'#'}.'" class="btn btn-sm btn-warning'.(Application::getController()->canEdit($item->author) ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-pen fa-fw"></i></a>';
+		$html .= '<a href="'.$routePath.strtolower($this->class).'/trash/'.$item->{'#'}.'" class="btn btn-sm btn-danger'.(Application::getController()->canPublish() ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-trash fa-fw"></i></a>';
 		$html .= '</div></div>';
 		return $html;
+	}
+	
+	public function view(&$_Data) {
+		// Store the article attributes
+		if(empty($this->_Attribute))
+			!empty($_Data->{'@attribute'}) && $this->_Attribute = json_decode($_Data->{'@attribute'},true);
+		// Retrieve the template; we need the template attributes as they are global settings
+		$_Template = Template::get($_Data->template ?? Configuration::getDefault('template','default'),"`name`,`@attribute`");
+		if($_Template) {
+			// Save template name as parameter
+			Configuration::setParameter('template',$_Template->name);
+			// Save template attributes as global settings
+			!empty($_Template->{'@attribute'}) && Configuration::set('_Attribute',json_decode($_Template->{'@attribute'},true));
+		}
+		// Get the body of the article
+		$html = $this->showItem($_Data);
+		// Render plugins and return output
+		return $this->renderPlugins($html);
 	}
 	
 	// Shared function to show item text in uniform way

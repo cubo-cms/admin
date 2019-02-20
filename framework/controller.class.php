@@ -195,7 +195,7 @@ class Controller {
 	
 	// Special method: create
 	public function create() {
-		die('Create item');
+		return $this->render(null);
 	}
 	
 	// Special method: edit
