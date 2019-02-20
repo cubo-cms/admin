@@ -13,14 +13,13 @@ class ArticleView extends View {
 				[ 'tab'=>'content-tab', 'pane'=>'content-pane', 'selected'=>true, 'title'=>'Content' ],
 				[ 'tab'=>'image-tab', 'pane'=>'image-pane', 'selected'=>false, 'title'=>'Image and Metadata' ],
 				[ 'tab'=>'publishing-tab', 'pane'=>'publishing-pane', 'selected'=>false, 'title'=>'Publishing' ],
-				[ 'tab'=>'view-options-tab', 'pane'=>'view-options-pane', 'selected'=>false, 'title'=>'View Options' ],
-				[ 'tab'=>'list-optiona-tab', 'pane'=>'list-options-pane', 'selected'=>false, 'title'=>'List Options' ]
+				[ 'tab'=>'view-options-tab', 'pane'=>'view-options-pane', 'selected'=>false, 'title'=>'View Options' ]
 			],
 			'content-pane'=>[
-				'columns'=>[ 'left'=>'col-12 col-lg-8','right'=>'col-12 col-lg-4' ],
+				'columns'=>[ 'left'=>'col-12 col-md-8','right'=>'col-12 col-md-4' ],
 				'left'=>[
-					[ 'name'=>'intro', 'class'=>'form-control text-html', 'required'=>true, 'size'=>4, 'title'=>ucwords($this->class).' Intro', 'type'=>'textarea', 'width'=>2 ],
-					[ 'name'=>'body', 'class'=>'form-control text-html', 'required'=>true, 'size'=>8, 'title'=>ucwords($this->class).' Body', 'type'=>'textarea', 'width'=>2 ]
+					[ 'name'=>'intro', 'class'=>'form-control text-html', 'required'=>true, 'size'=>4, 'title'=>ucwords($this->class).' Intro', 'type'=>'textarea' ],
+					[ 'name'=>'body', 'class'=>'form-control text-html', 'required'=>true, 'size'=>8, 'title'=>ucwords($this->class).' Body', 'type'=>'textarea' ]
 				],
 				'right'=>[
 					[ 'name'=>'status', 'class'=>'form-control form-control-sm', 'default'=>Application::getController()->canPublish() ? STATUS_PUBLISHED : STATUS_UNPUBLISHED, 'query'=>Form::query('status',Session::isAccessible()), 'readonly'=>Application::getController()->cannotPublish(), 'title'=>'Status', 'type'=>'select' ],
@@ -30,12 +29,17 @@ class ArticleView extends View {
 				]
 			],
 			'image-pane'=>[
+				'columns'=>[ 'left'=>'col-12 col-md-6','right'=>'col-12 col-md-6' ],
+				'left'=>[
+					[ 'name'=>'description', 'class'=>'form-control', 'required'=>false, 'size'=>4, 'title'=>ucwords($this->class).' Summary', 'type'=>'textarea' ]
+				],
+				'right'=>[
+					[ 'name'=>'tags', 'class'=>'form-control', 'required'=>false, 'size'=>4, 'title'=>'Tags', 'type'=>'textarea' ]
+				]
 			],
 			'publishing-pane'=>[
 			],
 			'view-options-pane'=>[
-			],
-			'list-options-pane'=>[
 			]
 		];
 	}

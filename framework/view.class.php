@@ -52,20 +52,18 @@ class View {
 			$tab = (object)$tab;
 			$html .= '<div class="tab-pane fade'.($tab->selected ? ' show active' : '').'" id="'.$tab->pane.'" role="tabpanel" aria-labelledby="'.$tab->tab.'">';
 			$html .= '<div class="row">';
-			if(isset($_Definition->{$tab->pane}['columns'])) {
+			if(isset($_Definition->{$tab->pane}['columns'])) {			// ************ REMOVE
 			$columns = $_Definition->{$tab->pane}['columns'];
-			//show($columns);
 			foreach($columns as $column=>$class) {
 				$column = $_Definition->{$tab->pane}[$column];
 				$html .= '<div class="'.$class.'">';
-				//show($column);
 				foreach($column as $field) {
 					$field = (object)$field;
 					$html .= $this->showField($field);
 				}
 				$html .= '</div>';
 			}
-			}
+			}															// ************ REMOVE
 			$html .= '</div>';
 			$html .= '</div>';
 		}
