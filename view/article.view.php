@@ -38,8 +38,34 @@ class ArticleView extends View {
 				]
 			],
 			'publishing-pane'=>[
+				'columns'=>[ 'left'=>'col-12 col-md-6','right'=>'col-12 col-md-6' ],
+				'left'=>[
+					[ 'name'=>'author', 'class'=>'form-control form-control-sm', 'default'=>Session::getUser(), 'query'=>Form::query('user',Session::isAccessible()), 'readonly'=>true, 'title'=>'Author', 'type'=>'select' ],
+					[ 'name'=>'editor', 'class'=>'form-control form-control-sm', 'default'=>USER_NOBODY, 'query'=>Form::query('user',Session::isAccessible()), 'readonly'=>true, 'title'=>'Editor', 'type'=>'select' ],
+					[ 'name'=>'publisher', 'class'=>'form-control form-control-sm', 'default'=>USER_NOBODY, 'query'=>Form::query('user',Session::isAccessible()), 'readonly'=>true, 'title'=>'Publisher', 'type'=>'select' ]
+				],
+				'right'=>[
+					[ 'name'=>'created', 'class'=>'form-control form-control-sm', 'default'=>'', 'readonly'=>true, 'title'=>'Created', 'type'=>'datetime' ],
+					[ 'name'=>'modified', 'class'=>'form-control form-control-sm', 'default'=>'', 'readonly'=>true, 'title'=>'Modified', 'type'=>'datetime' ],
+					[ 'name'=>'published', 'class'=>'form-control form-control-sm', 'default'=>'', 'readonly'=>true, 'title'=>'Published', 'type'=>'datetime' ]
+				]
 			],
 			'view-options-pane'=>[
+				'columns'=>[ 'left'=>'col-12 col-md-6','right'=>'col-12 col-md-6' ],
+				'left'=>[
+					[ 'name'=>'show-title', 'class'=>'form-control form-control-sm', 'default'=>SETTING_GLOBAL, 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_HIDE,'title'=>'Hide'],['#'=>SETTING_SHOW,'title'=>'Show']], 'prefix'=>'@', 'title'=>'Show Title', 'type'=>'select' ],
+					[ 'name'=>'show-author', 'class'=>'form-control form-control-sm', 'default'=>SETTING_GLOBAL, 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_HIDE,'title'=>'Hide'],['#'=>SETTING_AUTHOR,'title'=>'Show Author'],['#'=>SETTING_EDITOR,'title'=>'Show Editor'],['#'=>SETTING_PUBLISHER,'title'=>'Show Publisher']], 'prefix'=>'@', 'title'=>'Show Author', 'type'=>'select' ],
+					[ 'name'=>'show-category', 'class'=>'form-control form-control-sm', 'default'=>SETTING_GLOBAL, 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_HIDE,'title'=>'Hide'],['#'=>SETTING_SHOW,'title'=>'Show']], 'prefix'=>'@', 'title'=>'Show Category', 'type'=>'select' ],
+					[ 'name'=>'show-tags', 'class'=>'form-control form-control-sm', 'default'=>SETTING_GLOBAL, 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_HIDE,'title'=>'Hide'],['#'=>SETTING_SHOW,'title'=>'Show']], 'prefix'=>'@', 'title'=>'Show Tags', 'type'=>'select' ],
+					[ 'name'=>'show-date', 'class'=>'form-control form-control-sm', 'default'=>SETTING_GLOBAL, 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_HIDE,'title'=>'Hide'],['#'=>SETTING_CREATEDDATE,'title'=>'Show Created Date'],['#'=>SETTING_MODIFIEDDATE,'title'=>'Show Modified Date'],['#'=>SETTING_PUBLISHEDDATE,'title'=>'Show Published Date']], 'prefix'=>'@', 'title'=>'Show Date', 'type'=>'select' ]
+				],
+				'right'=>[
+					[ 'name'=>'show-image', 'class'=>'form-control form-control-sm', 'default'=>SETTING_GLOBAL, 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_HIDE,'title'=>'Hide'],['#'=>SETTING_SHOW,'title'=>'Show']], 'prefix'=>'@', 'title'=>'Show Image', 'type'=>'select' ],
+					[ 'name'=>'position-image', 'class'=>'form-control form-control-sm', 'default'=>SETTING_GLOBAL, 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_ABOVETITLE,'title'=>'Above Title'],['#'=>SETTING_BELOWTITLE,'title'=>'Below Title'],['#'=>SETTING_FLOATLEFT,'title'=>'Float Left'],['#'=>SETTING_FLOATRIGHT,'title'=>'Float Right']], 'prefix'=>'@', 'title'=>'Image Position', 'type'=>'select' ],
+					[ 'name'=>'show-info', 'class'=>'form-control form-control-sm', 'default'=>SETTING_GLOBAL, 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_HIDE,'title'=>'Hide'],['#'=>SETTING_SHOW,'title'=>'Show']], 'prefix'=>'@', 'title'=>'Show Info', 'type'=>'select' ],
+					[ 'name'=>'position-info', 'class'=>'form-control form-control-sm', 'default'=>SETTING_GLOBAL, 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_ABOVECONTENT,'title'=>'Above Content'],['#'=>SETTING_ABOVETITLE,'title'=>'Above Title'],['#'=>SETTING_BELOWTITLE,'title'=>'Below Title'],['#'=>SETTING_BELOWCONTENT,'title'=>'Below Content']], 'prefix'=>'@', 'title'=>'Info Position', 'type'=>'select' ],
+					[ 'name'=>'show-readmore', 'class'=>'form-control form-control-sm', 'default'=>SETTING_GLOBAL, 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_HIDE,'title'=>'Hide'],['#'=>SETTING_SHOW,'title'=>'Show']], 'prefix'=>'@', 'title'=>'Show Read More', 'type'=>'select' ]
+				]
 			]
 		];
 	}
@@ -55,7 +81,7 @@ class ArticleView extends View {
 			'status'=>[
 				'name'=>'filter-status',
 				'class'=>'form-control',
-				'list'=>['#'=>STATUS_ANY,'title'=>'Any status'],
+				'list'=>[['#'=>STATUS_ANY,'title'=>'Any status']],
 				'query'=>Form::query('status',Session::isAccessible()),
 				'title'=>'Status',
 				'value'=>STATUS_PUBLISHED
@@ -63,7 +89,7 @@ class ArticleView extends View {
 			'category'=>[
 				'name'=>'filter-category',
 				'class'=>'form-control',
-				'list'=>['#'=>CATEGORY_ANY,'title'=>'Any category'],
+				'list'=>[['#'=>CATEGORY_ANY,'title'=>'Any category']],
 				'query'=>Form::query('category',Session::isAccessible()),
 				'title'=>'Category',
 				'value'=>CATEGORY_ANY
@@ -71,7 +97,7 @@ class ArticleView extends View {
 			'language'=>[
 				'name'=>'filter-language',
 				'class'=>'form-control',
-				'list'=>['#'=>LANGUAGE_ANY,'title'=>'Any language'],
+				'list'=>[['#'=>LANGUAGE_ANY,'title'=>'Any language']],
 				'query'=>Form::query('language',Session::isAccessible()),
 				'title'=>'Language',
 				'value'=>LANGUAGE_ANY
@@ -79,7 +105,7 @@ class ArticleView extends View {
 			'accesslevel'=>[
 				'name'=>'filter-accesslevel',
 				'class'=>'form-control',
-				'list'=>['#'=>ACCESS_ANY,'title'=>'Any access level'],
+				'list'=>[['#'=>ACCESS_ANY,'title'=>'Any access level']],
 				'query'=>Form::query('accesslevel',Session::isAccessible()),
 				'title'=>'Access Level',
 				'value'=>ACCESS_ANY
