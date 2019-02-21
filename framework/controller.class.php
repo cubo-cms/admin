@@ -72,6 +72,7 @@ class Controller {
 	}
 	
 	public function all() {
+		// Double check if user is (still) logged in and has sufficient privileges
 		$model = __CUBO__.'\\'.$this->getRouter()->getController();
 		try {
 			if(!Session::isAuthor()) {
@@ -79,9 +80,9 @@ class Controller {
 				if(Session::isGuest()) {
 					// No user is logged in; redirect to login page
 					$model = ucfirst($this->getRouter()->getController());
-					Session::setMessage(array('alert'=>'info','icon'=>'exclamation','message'=>"{$model} list requires administrative privileges"));
+					Session::setMessage(['alert'=>'info','icon'=>'exclamation','message'=>"{$model} list requires administrative privileges"]);
 					Session::set('loginRedirect',Configuration::getParameter('uri'));
-					Router::redirect('/user/login',403);
+					Router::redirect($this->getRouter()->getRoute().'user/login',403);
 				} else {
 					// User is logged in, so does not have required permissions
 					$model = $this->getRouter()->getController();
@@ -158,15 +159,15 @@ class Controller {
 								// No user is logged in; redirect to login page
 								$model = ucfirst($this->getRouter()->getController());
 								$name = $this->getRouter()->getName();
-								Session::setMessage(array('alert'=>'info','icon'=>'exclamation','message'=>"{$model} '{$name}' requires user access"));
+								Session::setMessage(['alert'=>'info','icon'=>'exclamation','message'=>"{$model} '{$name}' requires user access"]);
 								Session::set('loginRedirect',Configuration::getParameter('uri'));
-								Router::redirect('/user/login',403);
+								Router::redirect($this->getRouter()->getRoute().'user/login',403);
 							} else {
 								// User is logged in, so does not have required permissions
 								$model = ucfirst($this->getRouter()->getController());
 								$name = $this->getRouter()->getName();
 								throw new Error(['class'=>__CLASS__,'method'=>__METHOD__,'line'=>__LINE__,'file'=>__FILE__,'severity'=>3,'response'=>405,'message'=>"User does not have access to {$model} '{$name}'"]);
-								//Session::setMessage(array('alert'=>'error','icon'=>'exclamation','text'=>"This user has no access to {$this->class}"));
+								//Session::setMessage(['alert'=>'error','icon'=>'exclamation','text'=>"This user has no access to {$this->class}"]);
 								//Session::set('loginRedirect',Application::getParam('uri'));
 								//Router::redirect('/user?noaccess',403);
 							}
@@ -195,7 +196,46 @@ class Controller {
 	
 	// Special method: create
 	public function create() {
-		return $this->render(null);
+		// Double check if user is (still) logged in and has sufficient privileges
+		$model = __CUBO__.'\\'.$this->getRouter()->getController();
+		try {
+			if(!Session::isAuthor()) {
+				// User does not have administrative privileges
+				if(Session::isGuest()) {
+					// No user is logged in; redirect to login page
+					$model = ucfirst($this->getRouter()->getController());
+					Session::setMessage(['alert'=>'info','icon'=>'exclamation','message'=>"{$model} list requires administrative privileges"]);
+					Session::set('loginRedirect',Configuration::getParameter('uri'));
+					Router::redirect($this->getRouter()->getRoute().'user/login',403);
+				} else {
+					// User is logged in, so does not have required permissions
+					$model = $this->getRouter()->getController();
+					throw new Error(['class'=>__CLASS__,'method'=>__METHOD__,'line'=>__LINE__,'file'=>__FILE__,'severity'=>3,'response'=>405,'message'=>"User does not have administrative privileges to access {$model} list"]);
+				}
+			} elseif(class_exists($model)) {
+				if(!empty($_POST)) {
+					// Posted data; try to save
+					if($model::save($_POST) === true) {
+						$model = ucfirst($this->getRouter()->getController());
+						Session::setMessage(['alert'=>'success','icon'=>'check','message'=>"{$model} was created successfully"]);
+						$model = strtolower($this->getRouter()->getController());
+						Router::redirect($this->getRouter()->getRoute().$model);
+					} else {
+						$model = $this->getRouter()->getController();
+						throw new Error(['class'=>__CLASS__,'method'=>__METHOD__,'line'=>__LINE__,'file'=>__FILE__,'severity'=>3,'response'=>405,'message'=>"Unknown error when saving {$model}"]);
+					}
+				} else {
+					// No posted data; render the input form
+					return $this->render(null);
+				}
+			} else {
+				$model = $this->getRouter()->getController();
+				throw new Error(['class'=>__CLASS__,'method'=>__METHOD__,'severity'=>1,'response'=>405,'message'=>"Model '{$model}' does not exist"]);
+			}
+		} catch(Error $_Error) {
+			$_Error->showMessage();
+		}
+		return false;
 	}
 	
 	// Special method: edit
