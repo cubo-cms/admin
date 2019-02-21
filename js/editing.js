@@ -4,7 +4,7 @@ function toSeoUrl(url) {
 		.replace(/\s+/g,'-')
 		.toLowerCase()
 		.replace(/&/g,'-and-')
-		.replace(/[^a-z0-9\-]/g,'')
+		.replace(/[^a-z0-9_\.\-]/g,'')
 		.replace(/-+/g,'-')
 		.replace(/^-*/,'')
 		.replace(/-*$/,'');
@@ -19,12 +19,12 @@ $(document).ready(function() {
 	$('#name').on('change',function() {
 		$(this).val(toSeoUrl($(this).val()));
 	});
-	$(':input:not(.changed)').on('change paste keyup',function() {
+	$(':input:not(.changed):not([readonly])').on('change paste keyup',function() {
 		$('#submit').removeAttr('disabled');
-		$(this).addClass('changed');
+		$(this).addClass('changed text-primary');
 		var name = $(this).attr('name');
-		if(name.substr(0,1)=='-') {
-			$(this).attr('name',name.substr(1,name.length));
+		if(name.substr(0,1)!=':' && name.substr(0,1)!='@') {
+			$(this).attr('name',':'+name);
 		}
 	});
 });
