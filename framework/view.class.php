@@ -26,18 +26,18 @@ class View {
 		// Show heading
 		$html = '<h1>Create '.ucwords($this->class).'</h1>';
 		// Initiate form
-		$_Definition = $this->getDefinition();
+		$_Definition = $this->getDefinition(true);
 		$html .= '<form class="form-create" action="" method="post">';
 		// Save and cancel buttons
-		$routePath = Application::getController()->getRouter()->getRoutePath();
+		$route = Application::getController()->getRouter()->getRoute();
 		$html .= '<div class="form-group">';
 		$html .= '<button class="btn btn-success" id="submit" type="submit" disabled><i class="fa fa-check"></i> Save</button>';
-		$html .= '<a href="'.$routePath.strtolower($this->class).'" class="btn btn-danger" id="cancel"><i class="fa fa-times"></i> Cancel</a>';
+		$html .= '<a href="'.$route.strtolower($this->class).'" class="btn btn-danger" id="cancel"><i class="fa fa-times"></i> Cancel</a>';
 		$html .= '</div>';
 		// Show title and name
 		$html .= '<div class="grid-columns">';
-		$html .= '<div class="form-group grid-column-2"><label for="title">Title</label><input type="text" name="title" id="title" class="form-control" placeholder="Title" required autofocus /></div>';
-		$html .= '<div class="form-group"><label for="name">Alias</label><input type="text" name="name" id="name" class="form-control" placeholder="Alias" required /></div>';
+		$html .= '<div class="form-group grid-column-2"><label for="title">Title</label><input type="text" name=":title" id="title" class="form-control" placeholder="Title" required autofocus /></div>';
+		$html .= '<div class="form-group"><label for="name">Alias</label><input type="text" name=":name" id="name" class="form-control" placeholder="Alias" required /></div>';
 		$html .= '</div>';
 		// Show tabs
 		$html .= '<ul class="nav nav-tabs" id="tabs" role="tablist">';
@@ -52,7 +52,6 @@ class View {
 			$tab = (object)$tab;
 			$html .= '<div class="tab-pane fade'.($tab->selected ? ' show active' : '').'" id="'.$tab->pane.'" role="tabpanel" aria-labelledby="'.$tab->tab.'">';
 			$html .= '<div class="row">';
-			if(isset($_Definition->{$tab->pane}['columns'])) {			// ************ REMOVE
 			$columns = $_Definition->{$tab->pane}['columns'];
 			foreach($columns as $column=>$class) {
 				$column = $_Definition->{$tab->pane}[$column];
@@ -63,11 +62,14 @@ class View {
 				}
 				$html .= '</div>';
 			}
-			}															// ************ REMOVE
 			$html .= '</div>';
 			$html .= '</div>';
 		}
+		// End panes
 		$html .= '</div>';
+		// Add script
+		$route = Application::getController()->getRouter()->getRoute();
+		Configuration::addScript($route.'js/editing.js');
 		// Render plugins and return output
 		return $this->renderPlugins($html);
 	}
@@ -122,8 +124,8 @@ class View {
 		// End table
 		$html .= '</div>';
 		// Add script
-		$routePath = Application::getController()->getRouter()->getRoutePath();
-		Configuration::addScript($routePath.'js/filtering.js');
+		$route = Application::getController()->getRouter()->getRoute();
+		Configuration::addScript($route.'js/filtering.js');
 		// Render plugins and return output
 		return $this->renderPlugins($html);
 	}
@@ -181,18 +183,18 @@ class View {
 	}
 	
 	public function showTableHeaders() {
-		$routePath = Application::getController()->getRouter()->getRoutePath();
+		$route = Application::getController()->getRouter()->getRoute();
 		$html = '<div class="grid-columns row-header">';
 		foreach(explode(',',$this->listColumns) as $column) {
 			$html .= '<div class="align-middle"><strong>'.ucwords($column).'</strong></div>';
 		}
-		$html .= '<div class="text-right align-middle"><a href="'.$routePath.strtolower($this->class).'/create" class="btn btn-sm btn-success'.(Application::getController()->canCreate() ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-plus fa-fw"></i></a></div>';
+		$html .= '<div class="text-right align-middle"><a href="'.$route.strtolower($this->class).'/create" class="btn btn-sm btn-success'.(Application::getController()->canCreate() ? '' : ' disabled').'"><i class="fa fa-plus fa-fw"></i></a></div>';
 		$html .= '</div>';
 		return $html;
 	}
 	
 	public function showTableRow(&$item) {
-		$routePath = Application::getController()->getRouter()->getRoutePath();
+		$route = Application::getController()->getRouter()->getRoute();
 		$html = '<div class="table-item d-none grid-columns row-body" data-item="'.htmlentities(json_encode($item)).'" data-filter="none">';
 		$html .= '<div class="align-middle">'.$item->title.'</div>';
 		$html .= '<div class="align-middle">'.$this->showStatus($item).'</div>';
@@ -200,8 +202,8 @@ class View {
 		$html .= '<div class="align-middle">'.$this->showLanguage($item).'</div>';
 		$html .= '<div class="align-middle">'.$this->showAccessLevel($item).'</div>';
 		$html .= '<div class="text-right align-middle">';
-		$html .= '<a href="'.$routePath.strtolower($this->class).'/edit/'.$item->{'#'}.'" class="btn btn-sm btn-warning'.(Application::getController()->canEdit($item->author) ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-pen fa-fw"></i></a>';
-		$html .= '<a href="'.$routePath.strtolower($this->class).'/trash/'.$item->{'#'}.'" class="btn btn-sm btn-danger'.(Application::getController()->canPublish() ? '' : ' disabled').'" tabindex="-1"><i class="fa fa-trash fa-fw"></i></a>';
+		$html .= '<a href="'.$route.strtolower($this->class).'/edit/'.$item->{'#'}.'" class="btn btn-sm btn-warning'.(Application::getController()->canEdit($item->author) ? '' : ' disabled').'"><i class="fa fa-pen fa-fw"></i></a>';
+		$html .= '<a href="'.$route.strtolower($this->class).'/trash/'.$item->{'#'}.'" class="btn btn-sm btn-danger'.(Application::getController()->canPublish() ? '' : ' disabled').'""><i class="fa fa-trash fa-fw"></i></a>';
 		$html .= '</div></div>';
 		return $html;
 	}
