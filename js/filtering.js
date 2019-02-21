@@ -71,50 +71,6 @@ $(document).ready(function() {
 		});
 		$('#filter-info').html('Shown '+count+' out of '+total);
 	});
-	$('#filter-collection').on('change',function() {
-		var collection = parseInt($(this).val());
-		var count = 0;
-		var total = 0;
-		$('.table-item').each(function() {
-			var filter = parseInt($(this).attr('data-filter'));
-			if(collection == -1 || collection == $(this).data('item').collection) {
-				filter = filter & ~4;
-			} else {
-				filter = filter | 4;
-			}
-			$(this).attr('data-filter',filter);
-			if(filter) {
-				$(this).addClass('d-none');
-			} else {
-				$(this).removeClass('d-none');
-				count++;
-			}
-			total++;
-		});
-		$('#filter-info').html('Shown '+count+' out of '+total);
-	});
-	$('#filter-group').on('change',function() {
-		var group = parseInt($(this).val());
-		var count = 0;
-		var total = 0;
-		$('.table-item').each(function() {
-			var filter = parseInt($(this).attr('data-filter'));
-			if(group == -1 || group == $(this).data('item').group) {
-				filter = filter & ~4;
-			} else {
-				filter = filter | 4;
-			}
-			$(this).attr('data-filter',filter);
-			if(filter) {
-				$(this).addClass('d-none');
-			} else {
-				$(this).removeClass('d-none');
-				count++;
-			}
-			total++;
-		});
-		$('#filter-info').html('Shown '+count+' out of '+total);
-	});
 	$('#filter-option').on('change',function() {
 		var option = parseInt($(this).val());
 		var count = 0;
@@ -181,13 +137,13 @@ $(document).ready(function() {
 		});
 		$('#filter-info').html('Shown '+count+' out of '+total);
 	});
-	$('#filter-access').on('change',function() {
-		var access = parseInt($(this).val());
+	$('#filter-accesslevel').on('change',function() {
+		var accesslevel = parseInt($(this).val());
 		var count = 0;
 		var total = 0;
 		$('.table-item').each(function() {
 			var filter = parseInt($(this).attr('data-filter'));
-			if(access == -1 || access == $(this).data('item').access) {
+			if(accesslevel == -1 || accesslevel == $(this).data('item').accesslevel) {
 				filter = filter & ~16;
 			} else {
 				filter = filter | 16;
@@ -207,11 +163,9 @@ $(document).ready(function() {
 		$('#filter-text').trigger('change');
 		$('#filter-status').trigger('change');
 		//$('#filter-category').trigger('change');
-		//$('#filter-group').trigger('change');
-		//$('#filter-collection').trigger('change');
 		//$('#filter-option').trigger('change');
 		//$('#filter-language').trigger('change');
-		//$('#filter-access').trigger('change');
+		//$('#filter-accesslevel').trigger('change');
 	});
 	$('.img-selectable').click(function() {
 		$($(this).data('target')).val($(this).data('item').id).attr('name',$($(this).data('target')).attr('name').replace(/^-/,''));
@@ -221,7 +175,6 @@ $(document).ready(function() {
 	$('.img-selectable').each(function() {
 		//$('#filter-text').trigger('change');
 		$('#filter-status').trigger('change');
-		//$('#filter-collection').trigger('change');
 		//$('#filter-language').trigger('change');
 	});
 });
