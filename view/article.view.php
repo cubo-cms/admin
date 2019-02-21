@@ -7,7 +7,7 @@ class ArticleView extends View {
 	protected $listColumns = "title,status,category,language,accesslevel";
 	
 	// Form definition
-	public function getDefinition() {
+	public function getDefinition($new = false) {
 		return (object)[
 			'tabs'=>[
 				[ 'tab'=>'content-tab', 'pane'=>'content-pane', 'selected'=>true, 'title'=>'Content' ],
@@ -22,19 +22,19 @@ class ArticleView extends View {
 					[ 'name'=>'body', 'class'=>'form-control text-html', 'required'=>true, 'size'=>8, 'title'=>ucwords($this->class).' Body', 'type'=>'textarea' ]
 				],
 				'right'=>[
-					[ 'name'=>'status', 'class'=>'form-control form-control-sm', 'default'=>Application::getController()->canPublish() ? STATUS_PUBLISHED : STATUS_UNPUBLISHED, 'query'=>Form::query('status',Session::isAccessible()), 'readonly'=>Application::getController()->cannotPublish(), 'title'=>'Status', 'type'=>'select' ],
-					[ 'name'=>'category', 'class'=>'form-control form-control-sm', 'default'=>CATEGORY_UNDEFINED, 'query'=>Form::query('category',Session::isAccessible()), 'title'=>'Category', 'type'=>'select' ],
-					[ 'name'=>'language', 'class'=>'form-control form-control-sm', 'default'=>LANGUAGE_UNDEFINED, 'query'=>Form::query('language',Session::isAccessible()), 'title'=>'Language', 'type'=>'select' ],
-					[ 'name'=>'accesslevel', 'class'=>'form-control form-control-sm', 'default'=>ACCESS_PUBLIC, 'query'=>Form::query('accesslevel',Session::isAccessible()), 'title'=>'Access Level', 'type'=>'select' ]
+					[ 'name'=>'status', 'class'=>'form-control form-control-sm', 'default'=>Application::getController()->canPublish() ? STATUS_PUBLISHED : STATUS_UNPUBLISHED, 'prefix'=>($new ? ':' : ''), 'query'=>Form::query('status',Session::isAccessible()), 'readonly'=>Application::getController()->cannotPublish(), 'title'=>'Status', 'type'=>'select' ],
+					[ 'name'=>'category', 'class'=>'form-control form-control-sm', 'default'=>CATEGORY_UNDEFINED, 'prefix'=>($new ? ':' : ''), 'query'=>Form::query('category',Session::isAccessible()), 'title'=>'Category', 'type'=>'select' ],
+					[ 'name'=>'language', 'class'=>'form-control form-control-sm', 'default'=>LANGUAGE_UNDEFINED, 'prefix'=>($new ? ':' : ''), 'query'=>Form::query('language',Session::isAccessible()), 'title'=>'Language', 'type'=>'select' ],
+					[ 'name'=>'accesslevel', 'class'=>'form-control form-control-sm', 'default'=>ACCESS_PUBLIC, 'prefix'=>($new ? ':' : ''), 'query'=>Form::query('accesslevel',Session::isAccessible()), 'title'=>'Access Level', 'type'=>'select' ]
 				]
 			],
 			'image-pane'=>[
 				'columns'=>[ 'left'=>'col-12 col-md-6','right'=>'col-12 col-md-6' ],
 				'left'=>[
-					[ 'name'=>'description', 'class'=>'form-control', 'required'=>false, 'size'=>4, 'title'=>ucwords($this->class).' Summary', 'type'=>'textarea' ]
+					[ 'name'=>'description', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>ucwords($this->class).' Summary', 'type'=>'textarea' ]
 				],
 				'right'=>[
-					[ 'name'=>'tags', 'class'=>'form-control', 'required'=>false, 'size'=>4, 'title'=>'Tags', 'type'=>'textarea' ]
+					[ 'name'=>'tags', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>'Tags', 'type'=>'textarea' ]
 				]
 			],
 			'publishing-pane'=>[
