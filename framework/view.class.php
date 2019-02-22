@@ -25,9 +25,44 @@ class View {
 		}
 		// Show heading
 		$html = '<h1>Create '.ucwords($this->class).'</h1>';
+		// Render form
+		$html .= $this->renderForm($_Data);
+		// Add script
+		$route = Application::getController()->getRouter()->getRoute();
+		Configuration::addScript($route.'js/editing.js');
+		// Render plugins and return output
+		return $this->renderPlugins($html);
+	}
+	
+	// Call edit method
+	public function edit(&$_Data) {
+		// Store the article attributes
+		if(empty($this->_Attribute))
+			!empty($_Data->{'@attribute'}) && $this->_Attribute = json_decode($_Data->{'@attribute'},true);
+		// Retrieve the template; we need the template attributes as they are global settings
+		$_Template = Template::get($_Data->template ?? Configuration::getDefault('template','default'),"`name`,`@attribute`");
+		if($_Template) {
+			// Save template name as parameter
+			Configuration::setParameter('template',$_Template->name);
+			// Save template attributes as global settings
+			!empty($_Template->{'@attribute'}) && Configuration::set('_Attribute',json_decode($_Template->{'@attribute'},true));
+		}
+		// Show heading
+		$html = '<h1>Edit '.ucwords($this->class).'</h1>';
+		// Render form
+		$html .= $this->renderForm($_Data);
+		// Add script
+		$route = Application::getController()->getRouter()->getRoute();
+		Configuration::addScript($route.'js/editing.js');
+		// Render plugins and return output
+		return $this->renderPlugins($html);
+	}
+	
+	// Render the form for editing
+	protected function renderForm(&$_Data) {
 		// Initiate form
-		$_Definition = $this->getDefinition(true);
-		$html .= '<form class="form-create" action="" method="post">';
+		$_Definition = $this->getDefinition($_Data);
+		$html = '<form class="form-editing" action="" method="post">';
 		// Save and cancel buttons
 		$route = Application::getController()->getRouter()->getRoute();
 		$html .= '<div class="form-group">';
@@ -35,9 +70,16 @@ class View {
 		$html .= '<a href="'.$route.strtolower($this->class).'" class="btn btn-danger" id="cancel"><i class="fa fa-times"></i> Cancel</a>';
 		$html .= '</div>';
 		// Show title and name
-		$html .= '<div class="grid-columns">';
-		$html .= '<div class="form-group grid-column-2"><label for="title">Title</label><input type="text" name=":title" id="title" class="form-control" placeholder="Title" required autofocus /></div>';
-		$html .= '<div class="form-group"><label for="name">Alias</label><input type="text" name=":name" id="name" class="form-control" placeholder="Alias" required /></div>';
+		$html .= '<div class="row">';
+		foreach($_Definition->top['columns'] as $column=>$class) {
+			$column = $_Definition->top[$column];
+			$html .= '<div class="'.$class.'">';
+			foreach($column as $field) {
+				$field = (object)$field;
+				$html .= $this->showField($field);
+			}
+			$html .= '</div>';
+		}
 		$html .= '</div>';
 		// Show tabs
 		$html .= '<ul class="nav nav-tabs" id="tabs" role="tablist">';
@@ -67,14 +109,12 @@ class View {
 		}
 		// End panes
 		$html .= '</div>';
-		// Add script
-		$route = Application::getController()->getRouter()->getRoute();
-		Configuration::addScript($route.'js/editing.js');
-		// Render plugins and return output
-		return $this->renderPlugins($html);
+		// End form
+		$html .= '</form>';
+		return $html;
 	}
 	
-	public function showField($field) {
+	protected function showField($field) {
 		$type = $field->type;
 		return Form::$type($field);
 	}
@@ -85,12 +125,12 @@ class View {
 	}
 	
 	// Get attribute
-	public function getAttribute($attribute) {
+	protected function getAttribute($attribute) {
 		return (isset($this->_Attribute[$attribute]) && $this->_Attribute[$attribute] != SETTING_GLOBAL ? $this->_Attribute[$attribute] : Configuration::getAttribute($attribute) ?? null);
 	}
 	
 	// Get model class
-	public function getClass() {
+	protected function getClass() {
 		return $this->class;
 	}
 	
@@ -130,7 +170,7 @@ class View {
 		return $this->renderPlugins($html);
 	}
 	
-	public function renderPlugins($html) {
+	protected function renderPlugins($html) {
 		// Render plugins
 		$_Plugins = Plugin::getAll();
 		foreach($_Plugins as &$_Plugin) {
@@ -142,18 +182,18 @@ class View {
 	}
 	
 	// Show access level
-	public function showAccessLevel(&$item) {
+	protected function showAccessLevel(&$item) {
 		$_AccessLevel = AccessLevel::get($item->accesslevel,"`#`,`title`");
 		return $_AccessLevel->title ?? false;
 	}
 	
 	// Show category
-	public function showCategory(&$item) {
+	protected function showCategory(&$item) {
 		$_Category = Category::get($item->category,"`#`,`title`");
 		return $_Category->title ?? false;
 	}
 	
-	public function showFilters() {
+	protected function showFilters() {
 		$html = '<form id="filter-form" class="form">';
 		$html .= '<div class="grid-columns">';
 		foreach($this->getFilters() as $filter=>$data) {
@@ -171,18 +211,18 @@ class View {
 	}
 	
 	// Show language
-	public function showLanguage(&$item) {
+	protected function showLanguage(&$item) {
 		$_Language = Language::get($item->language,"`#`,`title`");
 		return $_Language->title ?? false;
 	}
 	
 	// Show status
-	public function showStatus(&$item) {
+	protected function showStatus(&$item) {
 		$_Status = Status::get($item->status,"`#`,`title`");
 		return $_Status->title ?? false;
 	}
 	
-	public function showTableHeaders() {
+	protected function showTableHeaders() {
 		$route = Application::getController()->getRouter()->getRoute();
 		$html = '<div class="grid-columns row-header">';
 		foreach(explode(',',$this->listColumns) as $column) {
@@ -193,7 +233,7 @@ class View {
 		return $html;
 	}
 	
-	public function showTableRow(&$item) {
+	protected function showTableRow(&$item) {
 		$route = Application::getController()->getRouter()->getRoute();
 		$html = '<div class="table-item d-none grid-columns row-body" data-item="'.htmlentities(json_encode($item)).'" data-filter="none">';
 		$html .= '<div class="align-middle">'.$item->title.'</div>';
@@ -227,12 +267,12 @@ class View {
 	}
 	
 	// Shared function to show item text in uniform way
-	public function showBody(&$_Data) {
+	protected function showBody(&$_Data) {
 		return $_Data->body ?? '';
 	}
 	
 	// Shared function to show item image in uniform way
-	public function showImage(&$_Data) {
+	protected function showImage(&$_Data) {
 		$html = '';
 		if($_Image = Image::get($_Data->image,'name,title')) {
 			$html = '<img class="article-image" src="'.__BASE__.'/image/'.urlencode($_Image->name).'" alt="'.htmlspecialchars($_Image->title,ENT_QUOTES|ENT_HTML5).'" />';
@@ -241,7 +281,7 @@ class View {
 	}
 	
 	// Shared function to show an item
-	public function showItem(&$_Data) {
+	protected function showItem(&$_Data) {
 		$html = '<div class="article">';
 		$html = '<h1 class="article-title">'.$this->showTitle($_Data).'</h1>';
 		$html .= '<div class="article-body">'.$this->showBody($_Data).'</div>';
@@ -251,7 +291,7 @@ class View {
 	}
 	
 	// Shared function to show a list of items
-	public function showList(&$_Data) {
+	protected function showList(&$_Data) {
 		$html = '<ul class="item-list">';
 		foreach($this->_Data as $item)
 			$html .= '<li class="list-item">'.$this->showItem($item).'</li>';
@@ -260,7 +300,7 @@ class View {
 	}
 	
 	// Shared function to show item heading in uniform way
-	public function showTitle(&$_Data) {
+	protected function showTitle(&$_Data) {
 		return '<h1 class="article-title">'.htmlspecialchars($_Data->title,ENT_QUOTES|ENT_HTML5).'</h1>';
 	}
 }
