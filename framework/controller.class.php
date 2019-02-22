@@ -257,7 +257,7 @@ class Controller {
 							if($model::save($_POST) === true) {
 								// Item saved; redirect to list
 								$model = ucfirst($this->getRouter()->getController());
-								Session::setMessage(['alert'=>'success','icon'=>'check','message'=>"{$model} was created successfully"]);
+								Session::setMessage(['alert'=>'success','icon'=>'check','message'=>"{$model} was modified successfully"]);
 								$model = strtolower($this->getRouter()->getController());
 								Router::redirect($this->getRouter()->getRoute().$model);
 							} else {
