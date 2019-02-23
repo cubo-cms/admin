@@ -154,15 +154,17 @@ class View {
 		// Show filter info
 		$html .= '<p id="filter-info"></p>';
 		// Begin table
-		$html .= '<div class="grid-rows">';
+		$html .= '<table class="table table-sm">';
 		// Show table headers
 		$html .= $this->showTableHeaders();
 		// Show table rows
+		$html .= '<tbody>';
 		foreach($_Data as $row) {
 			$html .= $this->showTableRow($row);
 		}
+		$html .= '</tbody>';
 		// End table
-		$html .= '</div>';
+		$html .= '</table>';
 		// Add script
 		$route = Application::getController()->getRouter()->getRoute();
 		Configuration::addScript($route.'js/filtering.js');
@@ -195,7 +197,7 @@ class View {
 	
 	protected function showFilters() {
 		$html = '<form id="filter-form" class="form">';
-		$html .= '<div class="grid-columns">';
+		$html .= '<div class="row">';
 		foreach($this->getFilters() as $filter=>$data) {
 			switch($filter) {
 				case 'text':
@@ -224,27 +226,27 @@ class View {
 	
 	protected function showTableHeaders() {
 		$route = Application::getController()->getRouter()->getRoute();
-		$html = '<div class="grid-columns row-header">';
+		$html = '<thead><tr>';
 		foreach(explode(',',$this->listColumns) as $column) {
-			$html .= '<div class="align-middle"><strong>'.ucwords($column).'</strong></div>';
+			$html .= '<th class="align-middle" scope="col"><strong>'.ucwords($column).'</strong></th>';
 		}
-		$html .= '<div class="text-right align-middle"><a href="'.$route.strtolower($this->class).'/create" class="btn btn-sm btn-success'.(Application::getController()->canCreate() ? '' : ' disabled').'"><i class="fa fa-plus fa-fw"></i></a></div>';
-		$html .= '</div>';
+		$html .= '<th class="text-right align-middle" scope="col"><a href="'.$route.strtolower($this->class).'/create" class="btn btn-sm btn-success'.(Application::getController()->canCreate() ? '' : ' disabled').'"><i class="fa fa-plus fa-fw"></i></a></th>';
+		$html .= '</tr></thead>';
 		return $html;
 	}
 	
 	protected function showTableRow(&$item) {
 		$route = Application::getController()->getRouter()->getRoute();
-		$html = '<div class="table-item d-none grid-columns row-body" data-item="'.htmlentities(json_encode($item)).'" data-filter="none">';
-		$html .= '<div class="align-middle">'.$item->title.'</div>';
-		$html .= '<div class="align-middle">'.$this->showStatus($item).'</div>';
-		$html .= '<div class="align-middle">'.$this->showCategory($item).'</div>';
-		$html .= '<div class="align-middle">'.$this->showLanguage($item).'</div>';
-		$html .= '<div class="align-middle">'.$this->showAccessLevel($item).'</div>';
-		$html .= '<div class="text-right align-middle">';
-		$html .= '<a href="'.$route.strtolower($this->class).'/edit/'.$item->{'#'}.'" class="btn btn-sm btn-warning'.(Application::getController()->canEdit($item->author) ? '' : ' disabled').'"><i class="fa fa-pen fa-fw"></i></a>';
+		$html = '<tr class="table-item d-none" data-item="'.htmlentities(json_encode($item)).'" data-filter="none">';
+		$html .= '<td class="align-middle">'.$item->title.'</td>';
+		$html .= '<td class="align-middle">'.$this->showStatus($item).'</td>';
+		$html .= '<td class="align-middle">'.$this->showCategory($item).'</td>';
+		$html .= '<td class="align-middle">'.$this->showLanguage($item).'</td>';
+		$html .= '<td class="align-middle">'.$this->showAccessLevel($item).'</td>';
+		$html .= '<td class="text-right align-middle">';
+		$html .= '<a href="'.$route.strtolower($this->class).'/edit/'.$item->{'#'}.'" class="btn btn-sm btn-primary'.(Application::getController()->canEdit($item->author) ? '' : ' disabled').'"><i class="fa fa-pen fa-fw"></i></a>';
 		$html .= '<a href="'.$route.strtolower($this->class).'/trash/'.$item->{'#'}.'" class="btn btn-sm btn-danger'.(Application::getController()->canPublish() ? '' : ' disabled').'""><i class="fa fa-trash fa-fw"></i></a>';
-		$html .= '</div></div>';
+		$html .= '</td></th>';
 		return $html;
 	}
 	
