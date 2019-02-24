@@ -12,7 +12,7 @@ class ArticleView extends View {
 		return (object)[
 			'list'=>[
 				'filters'=>[
-					'text'=>[ 'name'=>'filter-text', 'label'=>'Search', 'prefix'=>'', 'type'=>'textFilter', 'value'=>'' ],
+					'text'=>[ 'name'=>'filter-text', 'prefix'=>'', 'title'=>'Search', 'type'=>'textFilter', 'value'=>'' ],
 					'status'=>[ 'name'=>'filter-status', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-md-block', 'list'=>[['#'=>STATUS_ANY,'title'=>'Any status']], 'query'=>Form::query('status',Session::isAccessible()), 'title'=>'Status', 'type'=>'selectFilter', 'value'=>STATUS_PUBLISHED ],
 					'category'=>[ 'name'=>'filter-category', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>CATEGORY_ANY,'title'=>'Any category']], 'query'=>Form::query('category',Session::isAccessible()), 'title'=>'Category', 'type'=>'selectFilter', 'value'=>CATEGORY_ANY ],
 					'language'=>[ 'name'=>'filter-language', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>LANGUAGE_ANY,'title'=>'Any language']], 'query'=>Form::query('language',Session::isAccessible()), 'title'=>'Language', 'type'=>'selectFilter', 'value'=>LANGUAGE_ANY ],
@@ -57,10 +57,12 @@ class ArticleView extends View {
 			'image-pane'=>[
 				'columns'=>[ 'left'=>'col-12 col-md-6','right'=>'col-12 col-md-6' ],
 				'left'=>[
-					[ 'name'=>'description', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>ucwords($this->class).' Summary', 'type'=>'textarea', 'value'=>($_Data->description ?? '') ]
+					[ 'name'=>'description', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>ucwords($this->class).' Summary', 'type'=>'textarea', 'value'=>($_Data->description ?? '') ],
+					[ 'name'=>'image', 'class'=>'form-control','prefix'=>($new ? ':' : ''), 'title'=>'Select Image', 'type'=>'selectImage', 'value'=>($_Data->image ?? null) ]
 				],
 				'right'=>[
-					[ 'name'=>'tags', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>'Tags', 'type'=>'textarea', 'value'=>($_Data->description ?? '') ]
+					[ 'name'=>'tags', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>'Tags', 'type'=>'textarea', 'value'=>($_Data->description ?? '') ],
+					[ 'name'=>'image-preview', 'type'=>'previewImage', 'title'=>'Image Preview', 'value'=>($_Data->image ?? '') ]
 				]
 			],
 			'publishing-pane'=>[

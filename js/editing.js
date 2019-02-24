@@ -19,7 +19,7 @@ $(document).ready(function() {
 	$('#name').on('change',function() {
 		$(this).val(toSeoUrl($(this).val()));
 	});
-	$(':input:not(.changed):not([readonly])').on('change paste keyup',function() {
+	$(':input:not(.changed):not([readonly]):not([type=button])').on('change paste keyup',function() {
 		$('#submit').removeAttr('disabled');
 		$(this).addClass('changed text-primary');
 		var name = $(this).attr('name');

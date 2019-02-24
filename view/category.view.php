@@ -12,7 +12,7 @@ class CategoryView extends View {
 		return (object)[
 			'list'=>[
 				'filters'=>[
-					'text'=>[ 'name'=>'filter-text', 'label'=>'Search', 'prefix'=>'', 'type'=>'textFilter', 'value'=>'' ],
+					'text'=>[ 'name'=>'filter-text', 'prefix'=>'', 'title'=>'Search', 'type'=>'textFilter', 'value'=>'' ],
 					'status'=>[ 'name'=>'filter-status', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-md-block', 'list'=>[['#'=>STATUS_ANY,'title'=>'Any status']], 'query'=>Form::query('status',Session::isAccessible()), 'title'=>'Status', 'type'=>'selectFilter', 'value'=>STATUS_PUBLISHED ],
 					'parent'=>[ 'name'=>'filter-category', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>CATEGORY_ANY,'title'=>'Any category'],['#'=>CATEGORY_NONE,'title'=>'Root category']], 'query'=>Form::query('category',Session::isAccessible()), 'title'=>'Parent Category', 'type'=>'selectFilter', 'value'=>CATEGORY_ANY ],
 					'language'=>[ 'name'=>'filter-language', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>LANGUAGE_ANY,'title'=>'Any language']], 'query'=>Form::query('language',Session::isAccessible()), 'title'=>'Language', 'type'=>'selectFilter', 'value'=>LANGUAGE_ANY ],
