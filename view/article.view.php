@@ -10,6 +10,21 @@ class ArticleView extends View {
 	protected function getDefinition(&$_Data = null) {
 		$new = is_null($_Data);
 		return (object)[
+			'list'=>[
+				'filters'=>[
+					'text'=>[ 'name'=>'filter-text', 'label'=>'Search', 'prefix'=>'', 'type'=>'textFilter', 'value'=>'' ],
+					'status'=>[ 'name'=>'filter-status', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-md-block', 'list'=>[['#'=>STATUS_ANY,'title'=>'Any status']], 'query'=>Form::query('status',Session::isAccessible()), 'title'=>'Status', 'type'=>'selectFilter', 'value'=>STATUS_PUBLISHED ],
+					'category'=>[ 'name'=>'filter-category', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>CATEGORY_ANY,'title'=>'Any category']], 'query'=>Form::query('category',Session::isAccessible()), 'title'=>'Category', 'type'=>'selectFilter', 'value'=>CATEGORY_ANY ],
+					'language'=>[ 'name'=>'filter-language', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>LANGUAGE_ANY,'title'=>'Any language']], 'query'=>Form::query('language',Session::isAccessible()), 'title'=>'Language', 'type'=>'selectFilter', 'value'=>LANGUAGE_ANY ],
+					'accesslevel'=>[ 'name'=>'filter-accesslevel', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>ACCESS_ANY,'title'=>'Any access level']], 'query'=>Form::query('accesslevel',Session::isAccessible()), 'title'=>'Access Level', 'type'=>'selectFilter', 'value'=>ACCESS_ANY ]
+				],
+				'columns'=>[ 'title'=>'d-table-cell','status'=>'d-none d-md-table-cell','category'=>'d-none d-lg-table-cell','language'=>'d-none d-lg-table-cell','accesslevel'=>'d-none d-lg-table-cell' ],
+				'title'=>[ 'title'=>'Title', 'class'=>'', 'value'=>'showName' ],
+				'status'=>[ 'title'=>'Status', 'class'=>'d-none d-md-table-cell', 'value'=>'showStatus' ],
+				'category'=>[ 'title'=>'Category', 'class'=>'d-none d-lg-table-cell', 'value'=>'showCategory' ],
+				'language'=>[ 'title'=>'Language', 'class'=>'d-none d-lg-table-cell', 'value'=>'showLanguage' ],
+				'accesslevel'=>[ 'title'=>'Access Level', 'class'=>'d-none d-lg-table-cell', 'value'=>'showAccesslevel' ]
+			],
 			'top'=>[
 				'columns'=>[ 'left'=>'col-8','right'=>'col-4' ],
 				'left'=>[
@@ -29,8 +44,8 @@ class ArticleView extends View {
 			'content-pane'=>[
 				'columns'=>[ 'left'=>'col-12 col-md-8','right'=>'col-12 col-md-4' ],
 				'left'=>[
-					[ 'name'=>'intro', 'class'=>'form-control text-html', 'required'=>true, 'size'=>4, 'title'=>ucwords($this->class).' Intro', 'type'=>'textarea', 'value'=>($_Data->intro ?? '') ],
-					[ 'name'=>'body', 'class'=>'form-control text-html', 'required'=>true, 'size'=>8, 'title'=>ucwords($this->class).' Body', 'type'=>'textarea', 'value'=>($_Data->body ?? '') ]
+					[ 'name'=>'intro', 'class'=>'form-control text-html', 'size'=>4, 'title'=>ucwords($this->class).' Intro', 'type'=>'textarea', 'value'=>($_Data->intro ?? '') ],
+					[ 'name'=>'body', 'class'=>'form-control text-html', 'size'=>8, 'title'=>ucwords($this->class).' Body', 'type'=>'textarea', 'value'=>($_Data->body ?? '') ]
 				],
 				'right'=>[
 					[ 'name'=>'status', 'class'=>'form-control form-control-sm', 'prefix'=>($new ? ':' : ''), 'query'=>Form::query('status',Session::isAccessible()), 'readonly'=>Application::getController()->cannotPublish(), 'title'=>'Status', 'type'=>'select', 'value'=>($_Data->status ?? (Application::getController()->canPublish() ? STATUS_PUBLISHED : STATUS_UNPUBLISHED)) ],
@@ -77,49 +92,6 @@ class ArticleView extends View {
 					[ 'name'=>'position-info', 'class'=>'form-control form-control-sm', 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_ABOVECONTENT,'title'=>'Above Content'],['#'=>SETTING_ABOVETITLE,'title'=>'Above Title'],['#'=>SETTING_BELOWTITLE,'title'=>'Below Title'],['#'=>SETTING_BELOWCONTENT,'title'=>'Below Content']], 'prefix'=>'@', 'title'=>'Info Position', 'type'=>'select', 'value'=>($this->_Attribute['position-info'] ?? SETTING_GLOBAL) ],
 					[ 'name'=>'show-readmore', 'class'=>'form-control form-control-sm', 'list'=>[['#'=>SETTING_GLOBAL,'title'=>'Global setting'],['#'=>SETTING_HIDE,'title'=>'Hide'],['#'=>SETTING_SHOW,'title'=>'Show']], 'prefix'=>'@', 'title'=>'Show Read More', 'type'=>'select', 'value'=>($this->_Attribute['show-readmore'] ?? SETTING_GLOBAL) ]
 				]
-			]
-		];
-	}
-	
-	public function getFilters() {
-		return [
-			'text'=>[
-				'name'=>'filter-text',
-				'label'=>'Search',
-				'prefix'=>'',
-				'value'=>''
-			],
-			'status'=>[
-				'name'=>'filter-status',
-				'class'=>'form-control',
-				'list'=>[['#'=>STATUS_ANY,'title'=>'Any status']],
-				'query'=>Form::query('status',Session::isAccessible()),
-				'title'=>'Status',
-				'value'=>STATUS_PUBLISHED
-			],
-			'category'=>[
-				'name'=>'filter-category',
-				'class'=>'form-control',
-				'list'=>[['#'=>CATEGORY_ANY,'title'=>'Any category']],
-				'query'=>Form::query('category',Session::isAccessible()),
-				'title'=>'Category',
-				'value'=>CATEGORY_ANY
-			],
-			'language'=>[
-				'name'=>'filter-language',
-				'class'=>'form-control',
-				'list'=>[['#'=>LANGUAGE_ANY,'title'=>'Any language']],
-				'query'=>Form::query('language',Session::isAccessible()),
-				'title'=>'Language',
-				'value'=>LANGUAGE_ANY
-			],
-			'accesslevel'=>[
-				'name'=>'filter-accesslevel',
-				'class'=>'form-control',
-				'list'=>[['#'=>ACCESS_ANY,'title'=>'Any access level']],
-				'query'=>Form::query('accesslevel',Session::isAccessible()),
-				'title'=>'Access Level',
-				'value'=>ACCESS_ANY
 			]
 		];
 	}

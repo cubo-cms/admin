@@ -114,11 +114,6 @@ class View {
 		return $html;
 	}
 	
-	protected function showField($field) {
-		$type = $field->type;
-		return Form::$type($field);
-	}
-	
 	// Call default method: list
 	public function default(&$_Data) {
 		return $this->list($_Data);
@@ -154,7 +149,7 @@ class View {
 		// Show filter info
 		$html .= '<p id="filter-info"></p>';
 		// Begin table
-		$html .= '<table class="table table-sm">';
+		$html .= '<table class="table table-sm w-100">';
 		// Show table headers
 		$html .= $this->showTableHeaders();
 		// Show table rows
@@ -172,6 +167,7 @@ class View {
 		return $this->renderPlugins($html);
 	}
 	
+	// Render plugins
 	protected function renderPlugins($html) {
 		// Render plugins
 		$_Plugins = Plugin::getAll();
@@ -195,10 +191,17 @@ class View {
 		return $_Category->title ?? false;
 	}
 	
+	// Render individual form field
+	protected function showField($field) {
+		$type = $field->type;
+		return Form::$type($field);
+	}
+	
+	// Render filters
 	protected function showFilters() {
 		$html = '<form id="filter-form" class="form">';
 		$html .= '<div class="row">';
-		foreach($this->getFilters() as $filter=>$data) {
+		foreach($this->getDefinition()->list['filters'] as $filter=>$data) {
 			switch($filter) {
 				case 'text':
 					$html .= Form::textFilter($data);
@@ -218,6 +221,11 @@ class View {
 		return $_Language->title ?? false;
 	}
 	
+	// Show title
+	protected function showName(&$item) {
+		return $item->title ?? false;
+	}
+	
 	// Show status
 	protected function showStatus(&$item) {
 		$_Status = Status::get($item->status,"`#`,`title`");
@@ -226,9 +234,11 @@ class View {
 	
 	protected function showTableHeaders() {
 		$route = Application::getController()->getRouter()->getRoute();
+		$columns = $this->getDefinition()->list['columns'];
 		$html = '<thead><tr>';
-		foreach(explode(',',$this->listColumns) as $column) {
-			$html .= '<th class="align-middle" scope="col"><strong>'.ucwords($column).'</strong></th>';
+		foreach($columns as $column=>$class) {
+			$title = $this->getDefinition()->list[$column]['title'];
+			$html .= '<th class="align-middle '.$class.'" scope="col"><strong>'.$title.'</strong></th>';
 		}
 		$html .= '<th class="text-right align-middle" scope="col"><a href="'.$route.strtolower($this->class).'/create" class="btn btn-sm btn-success'.(Application::getController()->canCreate() ? '' : ' disabled').'"><i class="fa fa-plus fa-fw"></i></a></th>';
 		$html .= '</tr></thead>';
@@ -237,12 +247,12 @@ class View {
 	
 	protected function showTableRow(&$item) {
 		$route = Application::getController()->getRouter()->getRoute();
+		$columns = $this->getDefinition()->list['columns'];
 		$html = '<tr class="table-item d-none" data-item="'.htmlentities(json_encode($item)).'" data-filter="none">';
-		$html .= '<td class="align-middle">'.$item->title.'</td>';
-		$html .= '<td class="align-middle">'.$this->showStatus($item).'</td>';
-		$html .= '<td class="align-middle">'.$this->showCategory($item).'</td>';
-		$html .= '<td class="align-middle">'.$this->showLanguage($item).'</td>';
-		$html .= '<td class="align-middle">'.$this->showAccessLevel($item).'</td>';
+		foreach($columns as $column=>$class) {
+			$data = $this->getDefinition()->list[$column];
+			$html .= '<td class="align-middle '.$data['class'].'">'.$this->{$data['value']}($item).'</td>';
+		}
 		$html .= '<td class="text-right align-middle">';
 		$html .= '<a href="'.$route.strtolower($this->class).'/edit/'.$item->{'#'}.'" class="btn btn-sm btn-primary'.(Application::getController()->canEdit($item->author) ? '' : ' disabled').'"><i class="fa fa-pen fa-fw"></i></a>';
 		$html .= '<a href="'.$route.strtolower($this->class).'/trash/'.$item->{'#'}.'" class="btn btn-sm btn-danger'.(Application::getController()->canPublish() ? '' : ' disabled').'""><i class="fa fa-trash fa-fw"></i></a>';
