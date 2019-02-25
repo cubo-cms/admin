@@ -58,7 +58,7 @@ class ArticleView extends View {
 				'columns'=>[ 'left'=>'col-12 col-md-6','right'=>'col-12 col-md-6' ],
 				'left'=>[
 					[ 'name'=>'description', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>ucwords($this->class).' Summary', 'type'=>'textarea', 'value'=>($_Data->description ?? '') ],
-					[ 'name'=>'image', 'class'=>'form-control','prefix'=>($new ? ':' : ''), 'title'=>'Select Image', 'type'=>'selectImage', 'value'=>($_Data->image ?? null) ]
+					[ 'name'=>'image', 'class'=>'form-control','prefix'=>'', 'title'=>'Select Image', 'type'=>'selectImage', 'value'=>($_Data->image ?? null) ]
 				],
 				'right'=>[
 					[ 'name'=>'tags', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>'Tags', 'type'=>'textarea', 'value'=>($_Data->description ?? '') ],
