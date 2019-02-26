@@ -4,7 +4,7 @@ namespace Cubo;
 defined('__CUBO__') || new \Exception("No use starting a class without an include");
 
 class CategoryView extends View {
-	protected $listColumns = "title,status,parent,language,accesslevel";
+	protected $listColumns = "title,status,category,language,accesslevel";
 	
 	// Form definition
 	protected function getDefinition(&$_Data = null) {
@@ -14,14 +14,14 @@ class CategoryView extends View {
 				'filters'=>[
 					'text'=>[ 'name'=>'filter-text', 'prefix'=>'', 'title'=>'Search', 'type'=>'textFilter', 'value'=>'' ],
 					'status'=>[ 'name'=>'filter-status', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-md-block', 'list'=>[['#'=>STATUS_ANY,'title'=>'Any status']], 'query'=>Form::query('status',Session::isAccessible()), 'title'=>'Status', 'type'=>'selectFilter', 'value'=>STATUS_PUBLISHED ],
-					'parent'=>[ 'name'=>'filter-category', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>CATEGORY_ANY,'title'=>'Any category'],['#'=>CATEGORY_NONE,'title'=>'Root category']], 'query'=>Form::query('category',Session::isAccessible()), 'title'=>'Parent Category', 'type'=>'selectFilter', 'value'=>CATEGORY_ANY ],
+					'category'=>[ 'name'=>'filter-category', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>CATEGORY_ANY,'title'=>'Any category'],['#'=>CATEGORY_NONE,'title'=>'Root category']], 'query'=>Form::query('category',Session::isAccessible()), 'title'=>'Parent Category', 'type'=>'selectFilter', 'value'=>CATEGORY_ANY ],
 					'language'=>[ 'name'=>'filter-language', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>LANGUAGE_ANY,'title'=>'Any language']], 'query'=>Form::query('language',Session::isAccessible()), 'title'=>'Language', 'type'=>'selectFilter', 'value'=>LANGUAGE_ANY ],
 					'accesslevel'=>[ 'name'=>'filter-accesslevel', 'class'=>'form-control', 'group-class'=>'form-group col d-none d-lg-block', 'list'=>[['#'=>ACCESS_ANY,'title'=>'Any access level']], 'query'=>Form::query('accesslevel',Session::isAccessible()), 'title'=>'Access Level', 'type'=>'selectFilter', 'value'=>ACCESS_ANY ]
 				],
-				'columns'=>[ 'title'=>'d-table-cell','status'=>'d-none d-md-table-cell','parent'=>'d-none d-lg-table-cell','language'=>'d-none d-lg-table-cell','accesslevel'=>'d-none d-lg-table-cell' ],
+				'columns'=>[ 'title'=>'d-table-cell','status'=>'d-none d-md-table-cell','category'=>'d-none d-lg-table-cell','language'=>'d-none d-lg-table-cell','accesslevel'=>'d-none d-lg-table-cell' ],
 				'title'=>[ 'title'=>'Title', 'class'=>'', 'value'=>'showName' ],
 				'status'=>[ 'title'=>'Status', 'class'=>'d-none d-md-table-cell', 'value'=>'showStatus' ],
-				'parent'=>[ 'title'=>'Parent Category', 'class'=>'d-none d-lg-table-cell', 'value'=>'showCategory' ],
+				'category'=>[ 'title'=>'Parent Category', 'class'=>'d-none d-lg-table-cell', 'value'=>'showCategory' ],
 				'language'=>[ 'title'=>'Language', 'class'=>'d-none d-lg-table-cell', 'value'=>'showLanguage' ],
 				'accesslevel'=>[ 'title'=>'Access Level', 'class'=>'d-none d-lg-table-cell', 'value'=>'showAccesslevel' ]
 			],
@@ -48,7 +48,7 @@ class CategoryView extends View {
 				],
 				'right'=>[
 					[ 'name'=>'status', 'class'=>'form-control form-control-sm', 'prefix'=>($new ? ':' : ''), 'query'=>Form::query('status',Session::isAccessible()), 'readonly'=>Application::getController()->cannotPublish(), 'title'=>'Status', 'type'=>'select', 'value'=>($_Data->status ?? (Application::getController()->canPublish() ? STATUS_PUBLISHED : STATUS_UNPUBLISHED)) ],
-					[ 'name'=>'parent', 'class'=>'form-control form-control-sm', 'list'=>[['#'=>CATEGORY_NONE,'title'=>'Root category']], 'prefix'=>($new ? ':' : ''), 'query'=>Form::query('category',Session::isAccessible()), 'title'=>'Category', 'type'=>'select', 'value'=>($_Data->category ?? CATEGORY_NONE) ],
+					[ 'name'=>'category', 'class'=>'form-control form-control-sm', 'list'=>[['#'=>CATEGORY_NONE,'title'=>'Root category']], 'prefix'=>($new ? ':' : ''), 'query'=>Form::query('category',Session::isAccessible()), 'title'=>'Parent Category', 'type'=>'select', 'value'=>($_Data->category ?? CATEGORY_NONE) ],
 					[ 'name'=>'language', 'class'=>'form-control form-control-sm', 'prefix'=>($new ? ':' : ''), 'query'=>Form::query('language',Session::isAccessible()), 'title'=>'Language', 'type'=>'select', 'value'=>($_Data->language ?? LANGUAGE_UNDEFINED) ],
 					[ 'name'=>'accesslevel', 'class'=>'form-control form-control-sm', 'prefix'=>($new ? ':' : ''), 'query'=>Form::query('accesslevel',Session::isAccessible()), 'title'=>'Access Level', 'type'=>'select', 'value'=>($_Data->accesslevel ?? ACCESS_PUBLIC) ]
 				]
@@ -56,10 +56,12 @@ class CategoryView extends View {
 			'image-pane'=>[
 				'columns'=>[ 'left'=>'col-12 col-md-6','right'=>'col-12 col-md-6' ],
 				'left'=>[
-					[ 'name'=>'description', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>ucwords($this->class).' Summary', 'type'=>'textarea', 'value'=>($_Data->description ?? '') ]
+					[ 'name'=>'description', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>ucwords($this->class).' Summary', 'type'=>'textarea', 'value'=>($_Data->description ?? '') ],
+					[ 'name'=>'image', 'class'=>'form-control','prefix'=>'', 'title'=>'Select Image', 'type'=>'selectImage', 'value'=>($_Data->image ?? null) ]
 				],
 				'right'=>[
-					[ 'name'=>'tags', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>'Tags', 'type'=>'textarea', 'value'=>($_Data->description ?? '') ]
+					[ 'name'=>'tags', 'class'=>'form-control', 'prefix'=>($new ? ':' : ''), 'required'=>false, 'size'=>4, 'title'=>'Tags', 'type'=>'textarea', 'value'=>($_Data->description ?? '') ],
+					[ 'name'=>'image-preview', 'type'=>'previewImage', 'title'=>'Image Preview', 'value'=>($_Data->image ?? '') ]
 				]
 			],
 			'publishing-pane'=>[
